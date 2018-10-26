@@ -1,0 +1,6 @@
+[wrap-file]
+directory = cmocka-1.1.2
+
+source_url = https://cmocka.org/files/1.1/cmocka-1.1.2.tar.xz
+source_filename = cmocka-1.1.2.tar.xz
+source_hash = d11cd1e129827ff240a501c1c43557e808de89e8fcd8ab9e963c8db419332bdd
