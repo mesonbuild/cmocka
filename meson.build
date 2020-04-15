@@ -32,21 +32,18 @@ inc_include = include_directories('include')
 # Config Generation #
 #####################
 
-cc = meson.get_compiler('c')
-cc_native = meson.get_compiler('c', native: true)
-
 conf = configuration_data()
 conf_native = configuration_data()
 
 cc_dict = {
-    'compiler': cc,
+    'compiler': meson.get_compiler('c'),
     'machine': host_machine,
     'config': conf,
     'native': false
 }
 
 cc_native_dict = {
-    'compiler': cc_native,
+    'compiler': meson.get_compiler('c', native: true),
     'machine': build_machine,
     'config': conf_native,
     'native': true
@@ -57,10 +54,10 @@ configurations = [cc_dict, cc_native_dict]
 foreach entry : configurations
   compiler = entry.get('compiler')
   config = entry.get('config')
-  n = entry.get('native')
+  is_native = entry.get('native')
   machine = entry.get('machine')
 
-  if ['gcc_native', 'clang'].contains(compiler.get_id())
+  if ['gcc', 'clang'].contains(compiler.get_id())
     add_project_arguments(
       # I've explicitly skipped the duplicated -W versions when they also test
       # for the -Werror version
@@ -86,12 +83,12 @@ foreach entry : configurations
         '-fno-common',
       ),
       language : ['c'],
-      native: n
+      native: is_native
     )
     # We can't test the build type, so we can' add -D_FORTIFY_SOURCE=2 here
     if machine.system() == 'darwin'
       if compiler.has_argument('-Wno-deprecated-declarations')
-        add_project_arguments('-Wno-deprecated-declarations', language : ['c'], native: n)
+        add_project_arguments('-Wno-deprecated-declarations', language : ['c'], native: is_native)
       endif
     endif
   elif compiler.get_id() == 'msvc'
@@ -101,7 +98,7 @@ foreach entry : configurations
       '/D_CRT_NONSTDC_NO_WARNINGS=1',
       '/D_CRT_SECURE_NO_WARNINGS=1',
       language : ['c'],
-      native: n
+      native: is_native
     )
   endif
 
@@ -170,8 +167,6 @@ endif
       config.set('HAVE_GCC_THREAD_LOCAL_STORAGE', 1)
     endif
   endif
-
-  dep_rt = compiler.find_library('rt', required : false)
 
   if (config.get('HAVE_TIME_H', 0) == 1 and
       config.get('HAVE_STRUCT_TIMESPEC', 0) == 1 and
