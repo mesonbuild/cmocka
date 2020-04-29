@@ -39,6 +39,7 @@ cc_dict = {
     'compiler': meson.get_compiler('c'),
     'machine': host_machine,
     'config': conf,
+    'header-subdir': 'private',
     'native': false
 }
 
@@ -46,6 +47,7 @@ cc_native_dict = {
     'compiler': meson.get_compiler('c', native: true),
     'machine': build_machine,
     'config': conf_native,
+    'header-subdir': 'private_native',
     'native': true
 }
 
@@ -181,14 +183,15 @@ endif
     config.set('WORDS_BIGENDIAN', 1)
   endif
 
+  # Execute subdir to create config.h for this pass
+  subdir(entry.get('header-subdir'))
+
 endforeach
 
 ###########################
 # Subdirectory Processing #
 ###########################
 
-subdir('private')  # someplace safe to put the generated config.h file
-subdir('private_native') # someplace safe to put the generated config.h file for native: true
 subdir('src')
 
 ######################
